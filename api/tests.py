@@ -21,7 +21,7 @@ class UserTests(APITestCase):
 
     def test_get_user_if_not_admin(self):
         # get user (test user from setup)
-        get_response = self.client.get("/api/users/{}/".format(1))
+        get_response = self.client.get('/api/users/1/')
         self.assertEqual(get_response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_user_if_admin(self):
@@ -29,7 +29,7 @@ class UserTests(APITestCase):
         User.objects.create_superuser("admin", "admin@example.com", "admin")
         self.client.login(username="admin", password="admin")
         # get user (test user from setup)
-        get_response = self.client.get("/api/users/{}/".format(1))
+        get_response = self.client.get('/api/users/1/')
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
         # check user
         self.assertEqual(get_response.data["username"], "test")

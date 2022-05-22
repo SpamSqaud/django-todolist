@@ -23,18 +23,17 @@ def todolist(request, todolist_id):
 def add_todo(request, todolist_id):
     if request.method == "POST":
         form = TodoForm(request.POST)
-        if form.is_valid():
-            user = request.user if request.user.is_authenticated else None
-            todo = Todo(
-                description=request.POST["description"],
-                todolist_id=todolist_id,
-                creator=user,
-            )
-            todo.save()
-            return redirect("lists:todolist", todolist_id=todolist_id)
-        else:
+        if not form.is_valid():
             return render(request, "lists/todolist.html", {"form": form})
 
+        user = request.user if request.user.is_authenticated else None
+        todo = Todo(
+            description=request.POST["description"],
+            todolist_id=todolist_id,
+            creator=user,
+        )
+        todo.save()
+        return redirect("lists:todolist", todolist_id=todolist_id)
     return redirect("lists:index")
 
 
@@ -46,35 +45,33 @@ def overview(request):
 
 
 def new_todolist(request):
-    if request.method == "POST":
-        form = TodoForm(request.POST)
-        if form.is_valid():
-            # create default todolist
-            user = request.user if request.user.is_authenticated else None
-            todolist = TodoList(creator=user)
-            todolist.save()
-            todo = Todo(
-                description=request.POST["description"],
-                todolist_id=todolist.id,
-                creator=user,
-            )
-            todo.save()
-            return redirect("lists:todolist", todolist_id=todolist.id)
-        else:
-            return render(request, "lists/index.html", {"form": form})
+    if request.method != "POST":
+        return redirect("lists:index")
+    form = TodoForm(request.POST)
+    if not form.is_valid():
+        return render(request, "lists/index.html", {"form": form})
 
-    return redirect("lists:index")
+    # create default todolist
+    user = request.user if request.user.is_authenticated else None
+    todolist = TodoList(creator=user)
+    todolist.save()
+    todo = Todo(
+        description=request.POST["description"],
+        todolist_id=todolist.id,
+        creator=user,
+    )
+    todo.save()
+    return redirect("lists:todolist", todolist_id=todolist.id)
 
 
 def add_todolist(request):
     if request.method == "POST":
         form = TodoListForm(request.POST)
-        if form.is_valid():
-            user = request.user if request.user.is_authenticated else None
-            todolist = TodoList(title=request.POST["title"], creator=user)
-            todolist.save()
-            return redirect("lists:todolist", todolist_id=todolist.id)
-        else:
+        if not form.is_valid():
             return render(request, "lists/overview.html", {"form": form})
 
+        user = request.user if request.user.is_authenticated else None
+        todolist = TodoList(title=request.POST["title"], creator=user)
+        todolist.save()
+        return redirect("lists:todolist", todolist_id=todolist.id)
     return redirect("lists:index")
